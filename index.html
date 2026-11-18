@@ -1,108 +1,96 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827">
-<title>Espelhamento Pro</title>
+<title>Espelhamento Pro 0.2</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0b1220;color:#f3f6fb;font-family:Arial,sans-serif;padding:20px}
-header{padding:18px 0;border-bottom:1px solid #26354b}
-h1{font-size:25px;color:#5ee0a0}
-h2{font-size:19px}
-p{color:#9aa9bd;line-height:1.5}
-.card{background:#152237;border:1px solid #26354b;border-radius:15px;padding:18px;margin:18px 0}
-label{display:block;margin:12px 0 6px;color:#9aa9bd}
-select,input,button{width:100%;padding:13px;border-radius:9px;border:1px solid #31435d;background:#0c1625;color:white;font-size:15px}
-button{background:#5ee0a0;color:#071a19;font-weight:bold;border:0;margin-top:15px}
-.status{padding:14px;background:#0c1625;border-radius:10px;text-align:center}
-small{color:#9aa9bd}
+:root{--bg:#0b1220;--panel:#152237;--field:#0c1625;--line:#2a3b54;--text:#f3f6fb;--muted:#9aa9bd;--green:#5ee0a0;--amber:#e6bd70}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;padding:18px;line-height:1.45}
+header{max-width:850px;margin:auto;padding:14px 0 22px;border-bottom:1px solid var(--line)}
+h1{color:var(--green);font-size:26px;margin:0 0 5px}h2{font-size:18px;margin:0 0 14px}.muted,small{color:var(--muted)}
+main{max-width:850px;margin:auto}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+label{display:block;color:var(--muted);font-size:13px;margin:10px 0 6px}
+input,select,button{width:100%;padding:13px;border-radius:10px;border:1px solid #354861;background:var(--field);color:var(--text);font-size:15px}
+button{cursor:pointer;font-weight:bold}.primary{background:var(--green);color:#071a19;border:0}.secondary{background:#23344d}.danger{background:#38232b;border-color:#71404a}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.status{padding:12px;background:var(--field);border-radius:10px;margin-top:12px;text-align:center;color:var(--muted)}
+.note{font-size:12px;color:var(--amber);line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--field);padding:11px;border-radius:10px;min-width:0}
+.stat small{display:block;font-size:11px}.stat strong{display:block;font-size:15px;overflow-wrap:anywhere;margin-top:4px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px;min-width:540px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted)}
+.empty{padding:16px;text-align:center;color:var(--muted);background:var(--field);border-radius:10px}
+footer{max-width:850px;margin:24px auto;color:var(--muted);font-size:11px;text-align:center}
+@media(max-width:540px){.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.card{padding:15px}.actions{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header>
-<h1>ESPELHAMENTO PRO</h1>
-<p>Central independente de análise de mercado</p>
-</header>
-
+<header><h1>ESPELHAMENTO PRO</h1><div class="muted">Versão 0.2 · Registro experimental de mercado</div></header>
+<main>
 <section class="card">
-<h2>01 — Configurar sessão</h2>
-<label>Plataforma</label>
-<select id="platform">
-<option>Avalon</option>
-<option>Quotex</option>
-<option>BullX</option>
-</select>
-<label>Ativo</label>
-<input id="asset" value="BTC/USD">
-<label>Mercado</label>
-<select id="market">
-<option>Digital</option>
-<option>OTC</option>
-<option>Mercado normal</option>
-</select>
-<label>Temporalidade</label>
-<select id="timeframe">
-<option>M1</option>
-<option>M5</option>
-<option>M15</option>
-<option>H1</option>
-</select>
-<button id="toggle">INICIAR SESSÃO</button>
-<p id="status" class="status">Sessão desativada</p>
-</section>
-
-<section class="card">
-<h2>02 — Painel de sinais</h2>
-<div class="status">
-<h2 id="signal">SEM SINAL</h2>
-<p>Aguardando integração com fonte de cotações validada.</p>
+<h2>01 — Sessão de análise</h2>
+<div class="grid">
+<div><label for="platform">Plataforma observada</label><select id="platform"><option>Avalon</option><option>Quotex</option><option>BullX</option></select></div>
+<div><label for="asset">Ativo</label><input id="asset" value="BTC/USD"></div>
+<div><label for="market">Mercado</label><select id="market"><option>Digital</option><option>OTC</option><option>Mercado normal</option></select></div>
+<div><label for="tf">Temporalidade do candle</label><select id="tf"><option value="60">M1</option><option value="300">M5</option><option value="900">M15</option><option value="3600">H1</option></select></div>
 </div>
-<p>Ativo: <strong id="shownAsset">BTC/USD</strong></p>
-<p>Período: <strong id="shownTime">M1</strong></p>
-<p><small>Esta versão ainda não gera recomendações nem acompanha cotações reais.</small></p>
+<div class="actions"><button class="primary" id="start">INICIAR SESSÃO</button><button class="secondary" id="end" disabled>ENCERRAR SESSÃO</button></div>
+<div class="status" id="sessionStatus">Sessão desativada</div>
+<p class="note">A sessão organiza os registros neste aparelho. Ela ainda não detecta automaticamente a corretora nem recebe preços da plataforma.</p>
 </section>
 
 <section class="card">
-<h2>03 — Sincronização</h2>
-<p>Celular: painel local preparado.</p>
-<p>Computador: sincronização em nuvem ainda não configurada.</p>
+<h2>02 — Registrar atualização de preço</h2>
+<label for="price">Preço observado no gráfico</label>
+<input id="price" type="number" inputmode="decimal" step="any" placeholder="Ex.: 67432.15">
+<button class="primary" id="record" disabled>REGISTRAR PREÇO</button>
+<div class="stats" style="margin-top:14px">
+<div class="stat"><small>Registros</small><strong id="tickCount">0</strong></div>
+<div class="stat"><small>Último preço</small><strong id="lastPrice">—</strong></div>
+<div class="stat"><small>Variação da sessão</small><strong id="change">—</strong></div>
+<div class="stat"><small>Último horário</small><strong id="lastTime">—</strong></div>
+</div>
+<p class="note">Cada preço é inserido manualmente a partir do gráfico. Não é uma captura automática nem uma cotação oficial da corretora.</p>
 </section>
 
 <section class="card">
-<h2>04 — Histórico</h2>
-<div id="history">Nenhuma sessão registrada.</div>
+<h2>03 — Candles reconstruídos a partir dos registros</h2>
+<div class="stats">
+<div class="stat"><small>Abertura</small><strong id="o">—</strong></div><div class="stat"><small>Máxima</small><strong id="h">—</strong></div><div class="stat"><small>Mínima</small><strong id="l">—</strong></div><div class="stat"><small>Fechamento</small><strong id="c">—</strong></div>
+</div>
+<p class="muted" id="candleInfo">Aguardando registros suficientes.</p>
+<div class="table-wrap"><table><thead><tr><th>Início</th><th>Abertura</th><th>Máxima</th><th>Mínima</th><th>Fechamento</th><th>Ticks</th></tr></thead><tbody id="candles"><tr><td colspan="6">Sem candles registrados.</td></tr></tbody></table></div>
 </section>
 
+<section class="card">
+<h2>04 — Dados da sessão</h2>
+<div class="actions"><button class="secondary" id="export">EXPORTAR CSV</button><button class="danger" id="clear">APAGAR DADOS LOCAIS</button></div>
+<div class="status" id="dataStatus">Os registros ficam armazenados neste navegador.</div>
+</section>
+</main>
+<footer>Espelhamento Pro 0.2 · Ferramenta experimental · Sem sinais operacionais e sem execução automática.</footer>
 <script>
-let active=false;
-let records=JSON.parse(localStorage.getItem("ep_history")||"[]");
 const $=id=>document.getElementById(id);
-function render(){
-$("history").innerHTML=records.length?
-records.map(x=>"<p>"+x+"</p>").join(""):"Nenhuma sessão registrada.";
-}
-$("toggle").onclick=()=>{
-if(!active){
-active=true;
-const entry=new Date().toLocaleString("pt-BR")+" — "+$("platform").value+" — "+$("asset").value+" — "+$("market").value+" — "+$("timeframe").value;
-records.push(entry);
-$("status").textContent="Sessão local iniciada";
-$("toggle").textContent="ENCERRAR SESSÃO";
-}else{
-active=false;
-$("status").textContent="Sessão encerrada";
-$("toggle").textContent="INICIAR SESSÃO";
-}
-localStorage.setItem("ep_history",JSON.stringify(records));
-render();
-};
-$("asset").oninput=()=>{$("shownAsset").textContent=$("asset").value};
-$("timeframe").onchange=()=>{$("shownTime").textContent=$("timeframe").value};
+const KEY="espelhamento_pro_v02";
+let state=JSON.parse(localStorage.getItem(KEY)||'{"active":false,"session":null,"ticks":[]}');
+const tf=()=>Number($("tf").value);
+const fmt=n=>n==null?"—":Number(n).toLocaleString("pt-BR",{maximumFractionDigits:8});
+const stamp=t=>new Date(t).toLocaleTimeString("pt-BR");
+function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+function currentCandle(){if(!state.ticks.length)return null;const bucket=Math.floor(state.ticks[state.ticks.length-1].ts/(tf()*1000));const rows=state.ticks.filter(x=>Math.floor(x.ts/(tf()*1000))===bucket);return {o:rows[0].price,h:Math.max(...rows.map(x=>x.price)),l:Math.min(...rows.map(x=>x.price)),c:rows[rows.length-1].price,n:rows.length,start:bucket*tf()*1000};}
+function buildCandles(){const map=new Map();for(const x of state.ticks){const b=Math.floor(x.ts/(tf()*1000))*tf()*1000;if(!map.has(b))map.set(b,[]);map.get(b).push(x.price);}return [...map.entries()].sort((a,b)=>a[0]-b[0]).map(([start,p])=>({start,o:p[0],h:Math.max(...p),l:Math.min(...p),c:p[p.length-1],n:p.length}));}
+function render(){const active=state.active;$("start").disabled=active;$("end").disabled=!active;$("record").disabled=!active;$("sessionStatus").textContent=active?`Sessão ativa: ${state.session.platform} · ${state.session.asset} · ${state.session.market}`:"Sessão desativada";$("tickCount").textContent=state.ticks.length;const last=state.ticks.at(-1),first=state.ticks[0];$("lastPrice").textContent=last?fmt(last.price):"—";$("lastTime").textContent=last?stamp(last.ts):"—";$("change").textContent=first&&last?fmt(last.price-first.price):"—";const cc=currentCandle();for(const [id,key] of [["o","o"],["h","h"],["l","l"],["c","c"]])$(id).textContent=cc?fmt(cc[key]):"—";$("candleInfo").textContent=cc?`Candle atual · ${new Date(cc.start).toLocaleString("pt-BR")} · ${cc.n} atualização(ões) registradas`:"Aguardando registros suficientes.";const rows=buildCandles().slice(-12).reverse();$("candles").innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.start).toLocaleTimeString("pt-BR")}</td><td>${fmt(x.o)}</td><td>${fmt(x.h)}</td><td>${fmt(x.l)}</td><td>${fmt(x.c)}</td><td>${x.n}</td></tr>`).join(""):'<tr><td colspan="6">Sem candles registrados.</td></tr>';}
+$("start").onclick=()=>{state.session={platform:$("platform").value,asset:$("asset").value.trim(),market:$("market").value,tf:$("tf").selectedOptions[0].text,started:new Date().toISOString()};state.ticks=[];state.active=true;save();render();};
+$("end").onclick=()=>{state.active=false;if(state.session)state.session.ended=new Date().toISOString();save();render();};
+$("record").onclick=()=>{const p=Number($("price").value);if(!Number.isFinite(p)||p<=0){alert("Digite um preço válido.");return;}state.ticks.push({ts:Date.now(),price:p});$("price").value="";save();render();};
+$("tf").onchange=render;
+$("export").onclick=()=>{if(!state.ticks.length){alert("Ainda não há preços registrados.");return;}const lines=[["timestamp_iso","timestamp_local","platform","asset","market","timeframe","price"].join(","),...state.ticks.map(x=>[new Date(x.ts).toISOString(),new Date(x.ts).toLocaleString("pt-BR"),state.session?.platform||"",state.session?.asset||"",state.session?.market||"",state.session?.tf||"",x.price].map(v=>'"'+String(v).replaceAll('"','""')+'"').join(","))];const blob=new Blob(["\\uFEFF"+lines.join("\\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="espelhamento-pro-registros.csv";a.click();URL.revokeObjectURL(a.href);};
+$("clear").onclick=()=>{if(confirm("Apagar todos os registros salvos neste navegador?")){state={active:false,session:null,ticks:[]};save();render();}};
 render();
 </script>
-</body>
-</html>
+</body></html>
 
