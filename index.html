@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Espelhamento Pro</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:#f3f6fb;font-family:Arial,sans-serif;padding:20px}
+header{padding:18px 0;border-bottom:1px solid #26354b}
+h1{font-size:25px;color:#5ee0a0}
+h2{font-size:19px}
+p{color:#9aa9bd;line-height:1.5}
+.card{background:#152237;border:1px solid #26354b;border-radius:15px;padding:18px;margin:18px 0}
+label{display:block;margin:12px 0 6px;color:#9aa9bd}
+select,input,button{width:100%;padding:13px;border-radius:9px;border:1px solid #31435d;background:#0c1625;color:white;font-size:15px}
+button{background:#5ee0a0;color:#071a19;font-weight:bold;border:0;margin-top:15px}
+.status{padding:14px;background:#0c1625;border-radius:10px;text-align:center}
+small{color:#9aa9bd}
+</style>
+</head>
+<body>
+<header>
+<h1>ESPELHAMENTO PRO</h1>
+<p>Central independente de análise de mercado</p>
+</header>
+
+<section class="card">
+<h2>01 — Configurar sessão</h2>
+<label>Plataforma</label>
+<select id="platform">
+<option>Avalon</option>
+<option>Quotex</option>
+<option>BullX</option>
+</select>
+<label>Ativo</label>
+<input id="asset" value="BTC/USD">
+<label>Mercado</label>
+<select id="market">
+<option>Digital</option>
+<option>OTC</option>
+<option>Mercado normal</option>
+</select>
+<label>Temporalidade</label>
+<select id="timeframe">
+<option>M1</option>
+<option>M5</option>
+<option>M15</option>
+<option>H1</option>
+</select>
+<button id="toggle">INICIAR SESSÃO</button>
+<p id="status" class="status">Sessão desativada</p>
+</section>
+
+<section class="card">
+<h2>02 — Painel de sinais</h2>
+<div class="status">
+<h2 id="signal">SEM SINAL</h2>
+<p>Aguardando integração com fonte de cotações validada.</p>
+</div>
+<p>Ativo: <strong id="shownAsset">BTC/USD</strong></p>
+<p>Período: <strong id="shownTime">M1</strong></p>
+<p><small>Esta versão ainda não gera recomendações nem acompanha cotações reais.</small></p>
+</section>
+
+<section class="card">
+<h2>03 — Sincronização</h2>
+<p>Celular: painel local preparado.</p>
+<p>Computador: sincronização em nuvem ainda não configurada.</p>
+</section>
+
+<section class="card">
+<h2>04 — Histórico</h2>
+<div id="history">Nenhuma sessão registrada.</div>
+</section>
+
+<script>
+let active=false;
+let records=JSON.parse(localStorage.getItem("ep_history")||"[]");
+const $=id=>document.getElementById(id);
+function render(){
+$("history").innerHTML=records.length?
+records.map(x=>"<p>"+x+"</p>").join(""):"Nenhuma sessão registrada.";
+}
+$("toggle").onclick=()=>{
+if(!active){
+active=true;
+const entry=new Date().toLocaleString("pt-BR")+" — "+$("platform").value+" — "+$("asset").value+" — "+$("market").value+" — "+$("timeframe").value;
+records.push(entry);
+$("status").textContent="Sessão local iniciada";
+$("toggle").textContent="ENCERRAR SESSÃO";
+}else{
+active=false;
+$("status").textContent="Sessão encerrada";
+$("toggle").textContent="INICIAR SESSÃO";
+}
+localStorage.setItem("ep_history",JSON.stringify(records));
+render();
+};
+$("asset").oninput=()=>{$("shownAsset").textContent=$("asset").value};
+$("timeframe").onchange=()=>{$("shownTime").textContent=$("timeframe").value};
+render();
+</script>
+</body>
+</html>
+
