@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827">
-<title>Espelhamento Pro 0.2.1</title>
+<title>Espelhamento Pro 0.3.0</title>
 <style>
 :root{--bg:#0b1220;--panel:#152237;--field:#0c1625;--line:#2a3b54;--text:#f3f6fb;--muted:#9aa9bd;--green:#5ee0a0;--amber:#e6bd70}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;padding:18px;line-height:1.45}
@@ -24,7 +24,7 @@ button{cursor:pointer;font-weight:bold}.primary{background:var(--green);color:#0
 </style>
 </head>
 <body>
-<header><h1>ESPELHAMENTO PRO</h1><div class="muted">Versão 0.2.1 · Sessão com configuração protegida</div></header>
+<header><h1>ESPELHAMENTO PRO</h1><div class="muted">Versão 0.3.0 · Leitura e análise experimental</div></header>
 <main>
 <section class="card">
 <h2>01 — Sessão de análise</h2>
@@ -59,20 +59,36 @@ button{cursor:pointer;font-weight:bold}.primary{background:var(--green);color:#0
 </section>
 
 <section class="card">
-<h2>04 — Dados da sessão</h2>
+<h2>04 — Leitura e indicação experimental</h2>
+<div class="status" id="signalBox">AGUARDANDO DADOS REAIS</div>
+<div class="stats" style="margin-top:14px">
+<div class="stat"><small>Tendência EMA 3/5</small><strong id="trend">—</strong></div>
+<div class="stat"><small>RSI curto</small><strong id="rsi">—</strong></div>
+<div class="stat"><small>Variação candle</small><strong id="candleMove">—</strong></div>
+<div class="stat"><small>Candles lidos</small><strong id="candleCount">0</strong></div>
+</div>
+<p class="note" id="analysisReason">Registre preços reais da plataforma. O painel só analisa quando houver pelo menos 6 candles com dados.</p>
+<p class="note">Sinal experimental para estudo. Não é previsão garantida, não executa operações e ainda precisa ser validado com histórico fora da amostra.</p>
+</section>
+
+<section class="card">
+<h2>05 — Dados da sessão</h2>
 <div class="actions"><button class="secondary" id="export">EXPORTAR CSV</button><button class="danger" id="clear">APAGAR DADOS LOCAIS</button></div>
 <div class="status">Os registros ficam armazenados somente neste navegador/aparelho.</div>
 </section>
 </main>
-<footer class="muted" style="max-width:850px;margin:24px auto;text-align:center;font-size:11px">Espelhamento Pro 0.2.1 · Ferramenta experimental · Sem sinais operacionais e sem execução automática.</footer>
+<footer class="muted" style="max-width:850px;margin:24px auto;text-align:center;font-size:11px">Espelhamento Pro 0.3.0 · Análise experimental de preços registrados · Sem execução automática.</footer>
 <script>
-const $=id=>document.getElementById(id), KEY="espelhamento_pro_v021";
-let state=JSON.parse(localStorage.getItem(KEY)||'{"active":false,"session":null,"ticks":[]}');
+const $=id=>document.getElementById(id), KEY="espelhamento_pro_v030", OLD_KEY="espelhamento_pro_v021";
+let state=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(OLD_KEY)||'{"active":false,"session":null,"ticks":[]}');
 const tf=()=>Number(state.session?.tfSeconds||$("tf").value);
 const fmt=n=>n==null?"—":Number(n).toLocaleString("pt-BR",{maximumFractionDigits:8});
 const stamp=t=>new Date(t).toLocaleTimeString("pt-BR");
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 function buildCandles(){const map=new Map();for(const x of state.ticks){const b=Math.floor(x.ts/(tf()*1000))*tf()*1000;if(!map.has(b))map.set(b,[]);map.get(b).push(x.price);}return [...map.entries()].sort((a,b)=>a[0]-b[0]).map(([start,p])=>({start,o:p[0],h:Math.max(...p),l:Math.min(...p),c:p[p.length-1],n:p.length}));}
+function ema(values,period){if(values.length<period)return null;const k=2/(period+1);let v=values.slice(0,period).reduce((a,b)=>a+b,0)/period;for(const x of values.slice(period))v=x*k+v*(1-k);return v;}
+function rsi(values,period=3){if(values.length<period+1)return null;let gains=0,losses=0;for(let i=values.length-period;i<values.length;i++){const d=values[i]-values[i-1];if(d>0)gains+=d;else losses-=d;}if(losses===0)return gains===0?50:100;return 100-(100/(1+gains/losses));}
+function analyze(rows){const closes=rows.map(x=>x.c);if(closes.length<6)return {signal:"AGUARDAR",reason:`Precisamos de 6 candles; há ${closes.length}.`,trend:"—",rsi:null,move:null};const e3=ema(closes,3),e5=ema(closes,5),rv=rsi(closes,3),last=closes.at(-1),prev=closes.at(-2),move=last-prev;let signal="AGUARDAR",reason="Condições misturadas; sem confirmação suficiente.";if(e3>e5&&rv>=55&&move>0){signal="COMPRA";reason="EMA 3 acima da EMA 5, RSI acima de 55 e último candle em alta.";}else if(e3<e5&&rv<=45&&move<0){signal="VENDA";reason="EMA 3 abaixo da EMA 5, RSI abaixo de 45 e último candle em baixa.";}return {signal,reason,trend:e3>e5?"ALTA":e3<e5?"BAIXA":"NEUTRA",rsi:rv,move};}
 function render(){
  const active=state.active;
  $("start").disabled=active;$("end").disabled=!active;$("record").disabled=!active;
@@ -86,6 +102,7 @@ function render(){
  const rows=buildCandles(),cc=rows.at(-1);for(const [id,key] of [["o","o"],["h","h"],["l","l"],["c","c"]])$(id).textContent=cc?fmt(cc[key]):"—";
  $("candleInfo").textContent=cc?`${state.session?.platform} · ${state.session?.asset} · ${state.session?.tf} · Candle atual iniciado às ${new Date(cc.start).toLocaleTimeString("pt-BR")} · ${cc.n} registro(s)`:"Aguardando registros.";
  $("candles").innerHTML=rows.length?rows.slice(-12).reverse().map(x=>`<tr><td>${new Date(x.start).toLocaleTimeString("pt-BR")}</td><td>${fmt(x.o)}</td><td>${fmt(x.h)}</td><td>${fmt(x.l)}</td><td>${fmt(x.c)}</td><td>${x.n}</td></tr>`).join(""):'<tr><td colspan="6">Sem candles registrados.</td></tr>';
+ const a=analyze(rows);$("signalBox").textContent=a.signal;$("trend").textContent=a.trend;$("rsi").textContent=a.rsi==null?"—":a.rsi.toFixed(1);$("candleMove").textContent=a.move==null?"—":fmt(a.move);$("candleCount").textContent=rows.length;$("analysisReason").textContent=a.reason;
 }
 $("start").onclick=()=>{const asset=$("asset").value.trim();if(!asset){alert("Informe o ativo antes de iniciar.");return;}state.session={platform:$("platform").value,asset,market:$("market").value,tf:$("tf").selectedOptions[0].text,tfSeconds:Number($("tf").value),started:new Date().toISOString()};state.ticks=[];state.active=true;save();render();};
 $("end").onclick=()=>{state.active=false;if(state.session)state.session.ended=new Date().toISOString();save();render();};
